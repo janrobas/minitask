@@ -1,0 +1,32 @@
+{
+  "name": "minitask",
+  "version": "1.0.0",
+  "description": "simple task manager",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron main.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "browserify -t [ babelify --presets [ react es2015 ] ] tasks.es -o tasks.js"
+  },
+  "author": "Jan Robas",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-react": "^6.22.0",
+    "babelify": "^7.3.0",
+    "browserify": "^14.0.0",
+    "electron": "^1.4.14"
+  },
+  "transform": [
+    [
+      "babelify",
+      {
+        "comments": false
+      }
+    ]
+  ],
+  "dependencies": {
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2"
+  }
+}
