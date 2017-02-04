@@ -2,6 +2,8 @@ const {remote, ipcRenderer} = require('electron')
 const {Menu, MenuItem} = remote
 const {dialog} = remote
 
+const settings = require('electron').remote.require('./settings')
+
 function saveAs() {
   var fileName = dialog.showSaveDialog(fileDialogOptions);
   if(fileName) {
@@ -73,17 +75,25 @@ var appName="";
 
 ipcRenderer.on('app-name', (event, t) => {
     appName = t;
-    refreshAppName();
+    refreshFileName();
 });
 
-function refreshAppName() {
-  if(window.fileName)
+ipcRenderer.on('file-open', (event, t) => {
+    window.dispatchEvent(new CustomEvent('open', {'detail':t}));
+});
+
+function refreshFileName() {
+  if(window.fileName) {
+    settings.setFileName(fileName);
     document.title = appName + " - " + window.fileName;
-  else
+  }
+  else {
+    settings.setFileName(null);
     document.title = appName
+  }
 }
 
-window.addEventListener("refreshfilename", refreshAppName, false);
+window.addEventListener("refreshfilename", refreshFileName, false);
 
 const menu = Menu.buildFromTemplate(template)
 Menu.setApplicationMenu(menu)

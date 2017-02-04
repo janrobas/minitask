@@ -21099,7 +21099,7 @@ var Table = function (_React$Component3) {
             { className: 'column', onDragOver: function onDragOver(e) {
                 return _this10.handleDragOver(e);
               }, onDrop: function onDrop() {
-                return _this10.handleDropStolpec(TaskState.DONE);
+                return _this10.handleDropColumn(TaskState.DONE);
               } },
             React.createElement(
               'div',

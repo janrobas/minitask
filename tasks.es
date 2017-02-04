@@ -328,7 +328,7 @@ class Table extends React.Component {
             {wip}
           </div>
 
-           <div className="column" onDragOver={(e) => this.handleDragOver(e)} onDrop={() => this.handleDropStolpec(TaskState.DONE)}>
+           <div className="column" onDragOver={(e) => this.handleDragOver(e)} onDrop={() => this.handleDropColumn(TaskState.DONE)}>
             <div className="column-title">DONE</div>
             {done}
            </div>
