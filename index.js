@@ -4,7 +4,9 @@ const {dialog} = remote
 
 const settings = require('electron').remote.require('./settings')
 
-function newFile() {
+window.changeHappened = false;
+
+let newFile = () => {
   window.dispatchEvent(new CustomEvent('set-tasks',
   {
     'detail': {
@@ -13,6 +15,7 @@ function newFile() {
         if(err) {
           alert(err)
         } else {
+          window.changeHappened = false;
           setFileName(null);
         }
       })
@@ -20,7 +23,7 @@ function newFile() {
   }));
 }
 
-function openFile(fileName) {
+let openFile = (fileName) => {
   fs.readFile(String(fileName), (function (err, data) {
     if (err) throw err;
     window.dispatchEvent(new CustomEvent('set-tasks',
@@ -32,6 +35,7 @@ function openFile(fileName) {
             alert(err)
           }
           else {
+            window.changeHappened = false;
             setFileName(fileName);
           }
         })
@@ -40,7 +44,7 @@ function openFile(fileName) {
   }));
 }
 
-function saveFile(fileName) {
+let saveFile = (fileName) => {
   window.dispatchEvent(new CustomEvent('get-tasks',
   {
     'detail': {
@@ -49,6 +53,7 @@ function saveFile(fileName) {
           if(err){
             alert("An error ocurred creating the file " + err.message);
           }
+          window.changeHappened = false;
           setFileName(fileName);
         });
       })
@@ -56,29 +61,53 @@ function saveFile(fileName) {
   }));
 }
 
-function saveAs() {
+let saveAs = () => {
   var fileName = dialog.showSaveDialog(fileDialogOptions);
   if(fileName) {
     saveFile(fileName);
   }
 }
 
-function setFileName(fileName) {
+let save = () => {
+  if(window.fileName) {
+    saveFile(window.fileName);
+  } else {
+    saveAs();
+  }
+}
+
+let setFileName = (fileName) => {
   window.fileName = fileName;
   refreshFileName();
 }
 
-function refreshFileName() {
+let refreshFileName = () => {
   if(window.fileName) {
-    settings.setFileName(settings.fileName);
-    document.title = appName + " - " + window.fileName;
+    settings.setFileName(window.fileName);
   }
   else {
     settings.setFileName(null);
+  }
+  refreshTitleBar();
+}
+
+let refreshTitleBar = () => {
+  if(window.fileName) {
+    document.title = appName + " - " + window.fileName;
+  }
+  else {
     document.title = appName
+  }
+
+  if(window.changeHappened) {
+    document.title += "*";
   }
 }
 
+let changeHandler = () => {
+  window.changeHappened = true;
+  refreshTitleBar();
+}
 
 const fileDialogOptions = {
   filters: [
@@ -110,11 +139,7 @@ const template = [
     {
     label: "Save",
     click: (() => {
-      if(window.fileName) {
-          saveFile(window.fileName);
-      } else {
-          saveAs();
-      }
+      save();
     })
     },
 
@@ -140,6 +165,16 @@ const template = [
 }
 ];
 
+window.addEventListener('beforeunload', function (event) {
+  if(window.changeHappened) {
+    var answer = confirm('Changes have been made. Do you want to save them?');
+    if(answer)
+      save();
+  }
+
+  return;
+});
+
 var appName="";
 
 // this listens for events from the main process
@@ -152,8 +187,7 @@ ipcRenderer.on('file-open', (event, fileName) => {
     openFile(fileName);
 });
 
-// TODO: delete
-window.addEventListener("refreshfilename", refreshFileName, false);
+window.addEventListener("change-happened", changeHandler, false);
 
 const menu = Menu.buildFromTemplate(template)
 Menu.setApplicationMenu(menu)

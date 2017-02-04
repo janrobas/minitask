@@ -81,14 +81,19 @@ class Table extends React.Component {
       editing: null
     };
   }
+  changeHappened() {
+    window.dispatchEvent(new CustomEvent('change-happened'));
+  }
   moveTask(a, b) {
     a.order = b.order;
     a.state = b.state;
     this.state.tasks.filter(x=>x.id != a.id && x.state == b.state && x.order >= b.order).forEach(x => x.order++);
+    this.changeHappened();
   }
   moveTaskState(a, state) {
     a.state = state;
     a.order = 1+this.state.tasks.map(x=>x.order).reduce((a,x)=>(x<a ? a : x));
+    this.changeHappened();
   }
   handleDrop(e, task) {
     this.moveTask(this.state.dragged, task);
@@ -182,6 +187,7 @@ class Table extends React.Component {
     this.setState({
       editing: null
     });
+    this.changeHappened();
   }
   cancelEdit() {
     this.setState({
@@ -197,15 +203,17 @@ class Table extends React.Component {
     this.setState({
       tasks: this.state.tasks.filter(x=>x.id != task.id)
     });
+    this.changeHappened();
   }
   deleteDraggedTask() {
     this.deleteTask(this.state.dragged);
     this.reset();
+    this.changeHappened();
   }
   newTask() {
     this.setState({
       editing: {title:"", state:TaskState.BACKLOG, description:"", order:1}
-    });
+    });    
   }
   createTask(task) {
     return (

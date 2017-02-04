@@ -18,7 +18,7 @@ app.on("window-all-closed", function() {
 app.on("ready", () => {
   win = new BrowserWindow({width: 1000, height: 800});
 
-  win.webContents.openDevTools()
+  //win.webContents.openDevTools()
 
   win.loadURL(url.format({
     pathname: path.join(__dirname, "index.html"),
@@ -31,7 +31,6 @@ app.on("ready", () => {
 
     fs.readFile(configFile, function (err, data) {
       if(!err) {
-        //win.webContents.send("file-open", data);
         if(data)
         	global.settings = JSON.parse(String(data));
 
@@ -42,10 +41,8 @@ app.on("ready", () => {
   });
 
   win.on("closed", () => {
-    win = null;
-
-    fs.writeFile(configFile, JSON.stringify(global.settings), function (err) {    	
-    	
+    fs.writeFile(configFile, JSON.stringify(global.settings), function (err) {
+    	win = null;
     });
     //app.quit;
   });

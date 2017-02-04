@@ -20687,6 +20687,11 @@ var Table = function (_React$Component3) {
   }
 
   _createClass(Table, [{
+    key: 'changeHappened',
+    value: function changeHappened() {
+      window.dispatchEvent(new CustomEvent('change-happened'));
+    }
+  }, {
     key: 'moveTask',
     value: function moveTask(a, b) {
       a.order = b.order;
@@ -20696,6 +20701,7 @@ var Table = function (_React$Component3) {
       }).forEach(function (x) {
         return x.order++;
       });
+      this.changeHappened();
     }
   }, {
     key: 'moveTaskState',
@@ -20706,6 +20712,7 @@ var Table = function (_React$Component3) {
       }).reduce(function (a, x) {
         return x < a ? a : x;
       });
+      this.changeHappened();
     }
   }, {
     key: 'handleDrop',
@@ -20834,6 +20841,7 @@ var Table = function (_React$Component3) {
       this.setState({
         editing: null
       });
+      this.changeHappened();
     }
   }, {
     key: 'cancelEdit',
@@ -20857,12 +20865,14 @@ var Table = function (_React$Component3) {
           return x.id != task.id;
         })
       });
+      this.changeHappened();
     }
   }, {
     key: 'deleteDraggedTask',
     value: function deleteDraggedTask() {
       this.deleteTask(this.state.dragged);
       this.reset();
+      this.changeHappened();
     }
   }, {
     key: 'newTask',
