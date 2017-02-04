@@ -4,12 +4,81 @@ const {dialog} = remote
 
 const settings = require('electron').remote.require('./settings')
 
+function newFile() {
+  window.dispatchEvent(new CustomEvent('set-tasks',
+  {
+    'detail': {
+      'tasks': [],
+      'callback': (err => {
+        if(err) {
+          alert(err)
+        } else {
+          setFileName(null);
+        }
+      })
+    }
+  }));
+}
+
+function openFile(fileName) {
+  fs.readFile(String(fileName), (function (err, data) {
+    if (err) throw err;
+    window.dispatchEvent(new CustomEvent('set-tasks',
+    {
+      'detail': {
+        'tasks': JSON.parse(data),
+        'callback': (err => {
+          if(err) {
+            alert(err)
+          }
+          else {
+            setFileName(fileName);
+          }
+        })
+      }
+    }));
+  }));
+}
+
+function saveFile(fileName) {
+  window.dispatchEvent(new CustomEvent('get-tasks',
+  {
+    'detail': {
+      'callback': (tasks => {
+        fs.writeFile(String(fileName), JSON.stringify(tasks), function (err) {
+          if(err){
+            alert("An error ocurred creating the file " + err.message);
+          }
+          setFileName(fileName);
+        });
+      })
+    }
+  }));
+}
+
 function saveAs() {
   var fileName = dialog.showSaveDialog(fileDialogOptions);
   if(fileName) {
-      window.dispatchEvent(new CustomEvent('saveas', {'detail':fileName}));
+    saveFile(fileName);
   }
 }
+
+function setFileName(fileName) {
+  window.fileName = fileName;
+  refreshFileName();
+}
+
+function refreshFileName() {
+  if(window.fileName) {
+    settings.setFileName(settings.fileName);
+    document.title = appName + " - " + window.fileName;
+  }
+  else {
+    settings.setFileName(null);
+    document.title = appName
+  }
+}
+
 
 const fileDialogOptions = {
   filters: [
@@ -24,7 +93,7 @@ const template = [
     {
     label: "New",
     click: (() => {
-          window.dispatchEvent(new CustomEvent('new'));
+      newFile();
     })
     },
 
@@ -32,8 +101,8 @@ const template = [
     label: "Open",
     click: (() => {
       var fileName = dialog.showOpenDialog(fileDialogOptions);
-      if(fileName) {
-          window.dispatchEvent(new CustomEvent('open', {'detail':fileName}));
+      if(fileName) {      
+        openFile(fileName);
       }
     })
     },
@@ -42,7 +111,7 @@ const template = [
     label: "Save",
     click: (() => {
       if(window.fileName) {
-          window.dispatchEvent(new CustomEvent('save'));
+          saveFile(window.fileName);
       } else {
           saveAs();
       }
@@ -73,26 +142,17 @@ const template = [
 
 var appName="";
 
-ipcRenderer.on('app-name', (event, t) => {
-    appName = t;
+// this listens for events from the main process
+ipcRenderer.on('app-name', (event, newAppName) => {
+    appName = newAppName;
     refreshFileName();
 });
 
-ipcRenderer.on('file-open', (event, t) => {
-    window.dispatchEvent(new CustomEvent('open', {'detail':t}));
+ipcRenderer.on('file-open', (event, fileName) => {
+    openFile(fileName);
 });
 
-function refreshFileName() {
-  if(window.fileName) {
-    settings.setFileName(fileName);
-    document.title = appName + " - " + window.fileName;
-  }
-  else {
-    settings.setFileName(null);
-    document.title = appName
-  }
-}
-
+// TODO: delete
 window.addEventListener("refreshfilename", refreshFileName, false);
 
 const menu = Menu.buildFromTemplate(template)

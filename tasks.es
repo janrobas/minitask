@@ -219,86 +219,54 @@ class Table extends React.Component {
     return(<Editor task={this.state.editing} handleUpdate={(id, title, description, important) => this.handleUpdate(id, title, description, important)} cancel={() => this.cancelEdit()} />);
   }
   handleKeyShortcuts(e) {
-        var keycode = e.keyCode;
-        var validText =
-        (keycode > 47 && keycode < 58)   || // številke
-        //keycode == 32 || keycode == 13   || presledek, enter
-        (keycode > 64 && keycode < 91)   || // črke
-        (keycode > 95 && keycode < 112); // || // numpad
-        //(keycode > 185 && keycode < 193) || // ;=,-./`
-        //(keycode > 218 && keycode < 223);   // [\]'
+    var keycode = e.keyCode;
+    var validText =
+    (keycode > 47 && keycode < 58)   || // numbers
+    //keycode == 32 || keycode == 13   || space, enter
+    (keycode > 64 && keycode < 91)   || // letters
+    (keycode > 95 && keycode < 112); // || // numpad
+    //(keycode > 185 && keycode < 193) || // ;=,-./`
+    //(keycode > 218 && keycode < 223);   // [\]'
 
-       if(keycode == 27){
-          this.cancelEdit();
-       } else if (keycode == 13 && e.ctrlKey && this.state.editing) {
+    if(keycode == 27){
+      this.cancelEdit();
+    } else if (keycode == 13 && e.ctrlKey && this.state.editing) {
 
-
-        } else if(validText) {
-          if(!this.state.editing) {
-            this.newTask();
-          }
-        }
+    } else if(validText) {
+      if(!this.state.editing) {
+        this.newTask();
+      }
+    }
   }
-  saveFileAs(e) {
-    var fileName = e.detail;
-    this.saveFileInternal(fileName);
-  }
-  saveFile(e) {
-    var fileName = window.fileName;
-    this.saveFileInternal(fileName);
-  }
-  saveFileInternal(fileName) {
-    fs.writeFile(String(fileName), JSON.stringify(this.state.tasks), function (err) {
-     if(err){
-         alert("An error ocurred creating the file "+ err.message)
-     }
+  handleExternalSetTasks(e) {    
+    var tasks = e.detail.tasks;
 
-      window.fileName = fileName;
-      window.dispatchEvent(new CustomEvent('refreshfilename'));
-    });
-  }
-  openFile(e) {
-    var fileName = e.detail;
+    if(!Array.isArray(tasks)) {
+      e.detail.callback("Cannot open the file - wrong file format.");
+      return;
+    }
 
-    fs.readFile(String(fileName), (function (err, data) {
-      if (err) throw err;
-
-      var tasks = JSON.parse(data);
-
-      if(!Array.isArray(tasks)) {
-        alert("Cannot open the file - wrong file format.");
+   for(let task of tasks) {
+      if(typeof task.id == "undefined" || typeof task.title == "undefined" || typeof task.description == "undefined" || typeof task.order == "undefined" || typeof task.state == "undefined") {
+        e.detail.callback("Cannot open the file - wrong file format.");
         return;
       }
+    }
 
-      for(let task of tasks) {
-        if(typeof task.id == "undefined" || typeof task.title == "undefined" || typeof task.description == "undefined" || typeof task.order == "undefined" || typeof task.state == "undefined") {
-          alert("Cannot open the file - wrong file format.");
-          return;
-        }
-      }
-
-      this.setState({
-        tasks: tasks
-      });
-
-      window.fileName = fileName;
-      window.dispatchEvent(new CustomEvent('refreshfilename'));
-    }).bind(this));
-  }
-  newFile() {
     this.setState({
-      tasks: []
+      tasks: tasks
     });
-    window.fileName = null;
-    window.dispatchEvent(new CustomEvent('refreshfilename'));
+
+    e.detail.callback(false);
+  }
+  handleExternalGetTasks(e) {
+    e.detail.callback(this.state.tasks);
   }
   componentDidMount() {
     keySubscribers["main"] = this.handleKeyShortcuts.bind(this);
     window.addEventListener("newtask", this.newTask.bind(this), false);
-    window.addEventListener("saveas", this.saveFileAs.bind(this), false);
-    window.addEventListener("save", this.saveFile.bind(this), false);
-    window.addEventListener("open", this.openFile.bind(this), false);
-    window.addEventListener("new", this.newFile.bind(this), false);
+    window.addEventListener("set-tasks", this.handleExternalSetTasks.bind(this), false);
+    window.addEventListener("get-tasks", this.handleExternalGetTasks.bind(this), false);
   }
   componentWillUnmount() {
     delete keySubscribers["main"];
@@ -344,7 +312,6 @@ class Table extends React.Component {
   }
 }
 
-
 function handleKeyShortcuts(e) {
   for (var key in keySubscribers) {
       keySubscribers[key](e);
@@ -352,9 +319,6 @@ function handleKeyShortcuts(e) {
 }
 
 window.addEventListener("keydown", handleKeyShortcuts, false);
-
-
-
 
 ReactDOM.render(
   <Table />,

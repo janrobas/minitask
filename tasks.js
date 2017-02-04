@@ -20922,9 +20922,9 @@ var Table = function (_React$Component3) {
     key: 'handleKeyShortcuts',
     value: function handleKeyShortcuts(e) {
       var keycode = e.keyCode;
-      var validText = keycode > 47 && keycode < 58 || // številke
-      //keycode == 32 || keycode == 13   || presledek, enter
-      keycode > 64 && keycode < 91 || // črke
+      var validText = keycode > 47 && keycode < 58 || // numbers
+      //keycode == 32 || keycode == 13   || space, enter
+      keycode > 64 && keycode < 91 || // letters
       keycode > 95 && keycode < 112; // || // numpad
       //(keycode > 185 && keycode < 193) || // ;=,-./`
       //(keycode > 218 && keycode < 223);   // [\]'
@@ -20938,98 +20938,61 @@ var Table = function (_React$Component3) {
       }
     }
   }, {
-    key: 'saveFileAs',
-    value: function saveFileAs(e) {
-      var fileName = e.detail;
-      this.saveFileInternal(fileName);
-    }
-  }, {
-    key: 'saveFile',
-    value: function saveFile(e) {
-      var fileName = window.fileName;
-      this.saveFileInternal(fileName);
-    }
-  }, {
-    key: 'saveFileInternal',
-    value: function saveFileInternal(fileName) {
-      fs.writeFile(String(fileName), JSON.stringify(this.state.tasks), function (err) {
-        if (err) {
-          alert("An error ocurred creating the file " + err.message);
+    key: 'handleExternalSetTasks',
+    value: function handleExternalSetTasks(e) {
+      var tasks = e.detail.tasks;
+
+      if (!Array.isArray(tasks)) {
+        e.detail.callback("Cannot open the file - wrong file format.");
+        return;
+      }
+
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = tasks[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var task = _step.value;
+
+          if (typeof task.id == "undefined" || typeof task.title == "undefined" || typeof task.description == "undefined" || typeof task.order == "undefined" || typeof task.state == "undefined") {
+            e.detail.callback("Cannot open the file - wrong file format.");
+            return;
+          }
         }
-
-        window.fileName = fileName;
-        window.dispatchEvent(new CustomEvent('refreshfilename'));
-      });
-    }
-  }, {
-    key: 'openFile',
-    value: function openFile(e) {
-      var fileName = e.detail;
-
-      fs.readFile(String(fileName), function (err, data) {
-        if (err) throw err;
-
-        var tasks = JSON.parse(data);
-
-        if (!Array.isArray(tasks)) {
-          alert("Cannot open the file - wrong file format.");
-          return;
-        }
-
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
         try {
-          for (var _iterator = tasks[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var task = _step.value;
-
-            if (typeof task.id == "undefined" || typeof task.title == "undefined" || typeof task.description == "undefined" || typeof task.order == "undefined" || typeof task.state == "undefined") {
-              alert("Cannot open the file - wrong file format.");
-              return;
-            }
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
           }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
         } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-              _iterator.return();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
+          if (_didIteratorError) {
+            throw _iteratorError;
           }
         }
+      }
 
-        this.setState({
-          tasks: tasks
-        });
+      this.setState({
+        tasks: tasks
+      });
 
-        window.fileName = fileName;
-        window.dispatchEvent(new CustomEvent('refreshfilename'));
-      }.bind(this));
+      e.detail.callback(false);
     }
   }, {
-    key: 'newFile',
-    value: function newFile() {
-      this.setState({
-        tasks: []
-      });
-      window.fileName = null;
-      window.dispatchEvent(new CustomEvent('refreshfilename'));
+    key: 'handleExternalGetTasks',
+    value: function handleExternalGetTasks(e) {
+      e.detail.callback(this.state.tasks);
     }
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
       keySubscribers["main"] = this.handleKeyShortcuts.bind(this);
       window.addEventListener("newtask", this.newTask.bind(this), false);
-      window.addEventListener("saveas", this.saveFileAs.bind(this), false);
-      window.addEventListener("save", this.saveFile.bind(this), false);
-      window.addEventListener("open", this.openFile.bind(this), false);
-      window.addEventListener("new", this.newFile.bind(this), false);
+      window.addEventListener("set-tasks", this.handleExternalSetTasks.bind(this), false);
+      window.addEventListener("get-tasks", this.handleExternalGetTasks.bind(this), false);
     }
   }, {
     key: 'componentWillUnmount',
