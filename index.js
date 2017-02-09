@@ -7,6 +7,7 @@ const settings = require('electron').remote.require('./settings')
 window.changeHappened = false;
 
 let newFile = () => {
+  // new file means no tasks; we set tasks to empty array
   window.dispatchEvent(new CustomEvent('set-tasks',
   {
     'detail': {
@@ -15,6 +16,7 @@ let newFile = () => {
         if(err) {
           alert(err)
         } else {
+          // new file means no changes
           window.changeHappened = false;
           setFileName(null);
         }
@@ -33,8 +35,7 @@ let openFile = (fileName) => {
         'callback': (err => {
           if(err) {
             alert(err)
-          }
-          else {
+          } else {
             window.changeHappened = false;
             setFileName(fileName);
           }
@@ -121,6 +122,7 @@ const template = [
   submenu: [
     {
     label: "New",
+    accelerator: "CmdOrCtrl+N",
     click: (() => {
       newFile();
     })
@@ -128,6 +130,7 @@ const template = [
 
     {
     label: "Open",
+    accelerator: "CmdOrCtrl+O",
     click: (() => {
       var fileName = dialog.showOpenDialog(fileDialogOptions);
       if(fileName) {      
@@ -138,6 +141,7 @@ const template = [
 
     {
     label: "Save",
+    accelerator: "CmdOrCtrl+S",
     click: (() => {
       save();
     })
@@ -145,6 +149,7 @@ const template = [
 
     {
     label: "Save as...",
+    accelerator: "Shift+CmdOrCtrl+S",
     click: (() => {
       saveAs();
     })

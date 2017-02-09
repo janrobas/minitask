@@ -85,14 +85,18 @@ class Table extends React.Component {
     window.dispatchEvent(new CustomEvent('change-happened'));
   }
   moveTask(a, b) {
+    // we put the task in place of previous task
     a.order = b.order;
     a.state = b.state;
+
+    // we increment the order of all tasks below
     this.state.tasks.filter(x=>x.id != a.id && x.state == b.state && x.order >= b.order).forEach(x => x.order++);
     this.changeHappened();
   }
   moveTaskState(a, state) {
     a.state = state;
-    a.order = 1+this.state.tasks.map(x=>x.order).reduce((a,x)=>(x<a ? a : x));
+    // we put the task at the end
+    a.order = 1+this.state.tasks.map(x=>x.order).reduce((a,x)=>Math.max(a,x));
     this.changeHappened();
   }
   handleDrop(e, task) {
@@ -163,6 +167,8 @@ class Table extends React.Component {
     this.state.editing.title=title;
     this.state.editing.description=description;
     this.state.editing.important=important;
+
+    // if we don't have an id, this means we have to create a new task with new id
     if(!id) {
       // new task
       var maxTaskId = 0;
@@ -212,7 +218,7 @@ class Table extends React.Component {
   }
   newTask() {
     this.setState({
-      editing: {title:"", state:TaskState.BACKLOG, description:"", order:1}
+      editing: {title:"", state:TaskState.BACKLOG, description:"", order:1}   // default parameters for new task
     });    
   }
   createTask(task) {
@@ -228,18 +234,24 @@ class Table extends React.Component {
   }
   handleKeyShortcuts(e) {
     var keycode = e.keyCode;
+
+    // any key letter or number without modifiers
     var validText =
-    (keycode > 47 && keycode < 58)   || // numbers
+    !e.ctrlKey &&
+    ((keycode > 47 && keycode < 58)   || // numbers
+    (keycode > 64 && keycode < 91)); // letters
+
+
+    //keycode > 95 && keycode < 112 // numpad
     //keycode == 32 || keycode == 13   || space, enter
-    (keycode > 64 && keycode < 91)   || // letters
-    (keycode > 95 && keycode < 112); // || // numpad
     //(keycode > 185 && keycode < 193) || // ;=,-./`
     //(keycode > 218 && keycode < 223);   // [\]'
 
     if(keycode == 27){
+      // we cancel edit if the user presses esc
       this.cancelEdit();
     } else if (keycode == 13 && e.ctrlKey && this.state.editing) {
-
+      return;
     } else if(validText) {
       if(!this.state.editing) {
         this.newTask();
@@ -249,14 +261,16 @@ class Table extends React.Component {
   handleExternalSetTasks(e) {    
     var tasks = e.detail.tasks;
 
+    // variable that represents tasks must be an array
     if(!Array.isArray(tasks)) {
-      e.detail.callback("Cannot open the file - wrong file format.");
+      e.detail.callback("Wrong format - cannot load tasks.");
       return;
     }
 
    for(let task of tasks) {
+      // each element in the array (task) must have certain properties, if properties are missing, we report error
       if(typeof task.id == "undefined" || typeof task.title == "undefined" || typeof task.description == "undefined" || typeof task.order == "undefined" || typeof task.state == "undefined") {
-        e.detail.callback("Cannot open the file - wrong file format.");
+        e.detail.callback("Wrong format - cannot load tasks.");
         return;
       }
     }

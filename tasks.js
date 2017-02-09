@@ -20694,8 +20694,11 @@ var Table = function (_React$Component3) {
   }, {
     key: 'moveTask',
     value: function moveTask(a, b) {
+      // we put the task in place of previous task
       a.order = b.order;
       a.state = b.state;
+
+      // we increment the order of all tasks below
       this.state.tasks.filter(function (x) {
         return x.id != a.id && x.state == b.state && x.order >= b.order;
       }).forEach(function (x) {
@@ -20707,10 +20710,11 @@ var Table = function (_React$Component3) {
     key: 'moveTaskState',
     value: function moveTaskState(a, state) {
       a.state = state;
+      // we put the task at the end
       a.order = 1 + this.state.tasks.map(function (x) {
         return x.order;
       }).reduce(function (a, x) {
-        return x < a ? a : x;
+        return Math.max(a, x);
       });
       this.changeHappened();
     }
@@ -20807,6 +20811,8 @@ var Table = function (_React$Component3) {
       this.state.editing.title = title;
       this.state.editing.description = description;
       this.state.editing.important = important;
+
+      // if we don't have an id, this means we have to create a new task with new id
       if (!id) {
         // new task
         var maxTaskId = 0;
@@ -20878,7 +20884,7 @@ var Table = function (_React$Component3) {
     key: 'newTask',
     value: function newTask() {
       this.setState({
-        editing: { title: "", state: TaskState.BACKLOG, description: "", order: 1 }
+        editing: { title: "", state: TaskState.BACKLOG, description: "", order: 1 } // default parameters for new task
       });
     }
   }, {
@@ -20932,16 +20938,23 @@ var Table = function (_React$Component3) {
     key: 'handleKeyShortcuts',
     value: function handleKeyShortcuts(e) {
       var keycode = e.keyCode;
-      var validText = keycode > 47 && keycode < 58 || // numbers
+
+      // any key letter or number without modifiers
+      var validText = !e.ctrlKey && (keycode > 47 && keycode < 58 || // numbers
+      keycode > 64 && keycode < 91); // letters
+
+
+      //keycode > 95 && keycode < 112 // numpad
       //keycode == 32 || keycode == 13   || space, enter
-      keycode > 64 && keycode < 91 || // letters
-      keycode > 95 && keycode < 112; // || // numpad
       //(keycode > 185 && keycode < 193) || // ;=,-./`
       //(keycode > 218 && keycode < 223);   // [\]'
 
       if (keycode == 27) {
+        // we cancel edit if the user presses esc
         this.cancelEdit();
-      } else if (keycode == 13 && e.ctrlKey && this.state.editing) {} else if (validText) {
+      } else if (keycode == 13 && e.ctrlKey && this.state.editing) {
+        return;
+      } else if (validText) {
         if (!this.state.editing) {
           this.newTask();
         }
@@ -20952,8 +20965,9 @@ var Table = function (_React$Component3) {
     value: function handleExternalSetTasks(e) {
       var tasks = e.detail.tasks;
 
+      // variable that represents tasks must be an array
       if (!Array.isArray(tasks)) {
-        e.detail.callback("Cannot open the file - wrong file format.");
+        e.detail.callback("Wrong format - cannot load tasks.");
         return;
       }
 
@@ -20965,8 +20979,9 @@ var Table = function (_React$Component3) {
         for (var _iterator = tasks[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var task = _step.value;
 
+          // each element in the array (task) must have certain properties, if properties are missing, we report error
           if (typeof task.id == "undefined" || typeof task.title == "undefined" || typeof task.description == "undefined" || typeof task.order == "undefined" || typeof task.state == "undefined") {
-            e.detail.callback("Cannot open the file - wrong file format.");
+            e.detail.callback("Wrong format - cannot load tasks.");
             return;
           }
         }
