@@ -20952,8 +20952,6 @@ var Table = function (_React$Component3) {
       if (keycode == 27) {
         // we cancel edit if the user presses esc
         this.cancelEdit();
-      } else if (keycode == 13 && e.ctrlKey && this.state.editing) {
-        return;
       } else if (validText) {
         if (!this.state.editing) {
           this.newTask();

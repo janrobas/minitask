@@ -29,11 +29,15 @@ app.on("ready", () => {
   win.webContents.on("did-finish-load", () => {
     win.webContents.send("app-name", titleName);
 
+    // read settings from file
     fs.readFile(configFile, function (err, data) {
       if(!err) {
-        if(data)
+        if(data) {
+        	// save settings to global variable
         	global.settings = JSON.parse(String(data));
+        }
 
+        // load last used file
         if(settings.getFileName())
         	win.webContents.send("file-open", settings.getFileName());
       }
@@ -41,6 +45,7 @@ app.on("ready", () => {
   });
 
   win.on("closed", () => {
+  	// write settings
     fs.writeFile(configFile, JSON.stringify(global.settings), function (err) {
     	win = null;
     });

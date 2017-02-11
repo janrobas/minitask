@@ -6,7 +6,16 @@ const settings = require('electron').remote.require('./settings')
 
 window.changeHappened = false;
 
+const fileDialogOptions = {
+  filters: [
+    {name: 'JSON File Type', extensions: ['json']},
+    {name: 'All Files', extensions: ['*']}
+  ]
+};
+
 let newFile = () => {
+  askToSaveIfChanged();
+
   // new file means no tasks; we set tasks to empty array
   window.dispatchEvent(new CustomEvent('set-tasks',
   {
@@ -26,6 +35,8 @@ let newFile = () => {
 }
 
 let openFile = (fileName) => {
+  askToSaveIfChanged();
+
   fs.readFile(String(fileName), (function (err, data) {
     if (err) throw err;
     window.dispatchEvent(new CustomEvent('set-tasks',
@@ -110,12 +121,33 @@ let changeHandler = () => {
   refreshTitleBar();
 }
 
-const fileDialogOptions = {
-  filters: [
-    {name: 'JSON File Type', extensions: ['json']},
-    {name: 'All Files', extensions: ['*']}
-  ]
-};
+let askToSaveIfChanged = () => {
+  if(window.changeHappened) {
+    var answer = confirm('Changes have been made. Do you want to save them?');
+    if(answer)
+      save();
+  }
+}
+
+window.addEventListener('beforeunload', function (event) {
+  askToSaveIfChanged();
+  return;
+});
+
+var appName="";
+
+// this listens for events from the main process
+ipcRenderer.on('app-name', (event, newAppName) => {
+    appName = newAppName;
+    refreshFileName();
+});
+
+ipcRenderer.on('file-open', (event, fileName) => {
+    openFile(fileName);
+});
+
+window.addEventListener("change-happened", changeHandler, false);
+
 const template = [
 {
   label: "File",
@@ -169,30 +201,6 @@ const template = [
   ]
 }
 ];
-
-window.addEventListener('beforeunload', function (event) {
-  if(window.changeHappened) {
-    var answer = confirm('Changes have been made. Do you want to save them?');
-    if(answer)
-      save();
-  }
-
-  return;
-});
-
-var appName="";
-
-// this listens for events from the main process
-ipcRenderer.on('app-name', (event, newAppName) => {
-    appName = newAppName;
-    refreshFileName();
-});
-
-ipcRenderer.on('file-open', (event, fileName) => {
-    openFile(fileName);
-});
-
-window.addEventListener("change-happened", changeHandler, false);
 
 const menu = Menu.buildFromTemplate(template)
 Menu.setApplicationMenu(menu)
