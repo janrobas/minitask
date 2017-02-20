@@ -1,8 +1,9 @@
 const {remote, ipcRenderer} = require('electron')
 const {Menu, MenuItem} = remote
 const {dialog} = remote
+const fs = require('fs-promise');
 
-const settings = require('electron').remote.require('./settings')
+const settings = require('electron').remote.require('./settings');
 
 window.changeHappened = false;
 
@@ -129,6 +130,20 @@ let askToSaveIfChanged = () => {
   }
 }
 
+let setThemeInternal = th => {
+  var oldlink = document.querySelector("[data-theme]");
+  oldlink.setAttribute("href", "themes/" + th);
+  settings.setTheme(th);
+}
+
+let setTheme = th => {
+  if(th) {
+    setThemeInternal(th);
+  } else {
+    setThemeInternal(settings.getTheme());
+  }
+}
+
 window.addEventListener('beforeunload', function (event) {
   askToSaveIfChanged();
   return;
@@ -146,61 +161,97 @@ ipcRenderer.on('file-open', (event, fileName) => {
     openFile(fileName);
 });
 
+ipcRenderer.on('set-theme', (event, theme) => {
+    setTheme(theme);
+});
+
 window.addEventListener("change-happened", changeHandler, false);
 
-const template = [
-{
-  label: "File",
-  submenu: [
-    {
-    label: "New",
-    accelerator: "CmdOrCtrl+N",
-    click: (() => {
-      newFile();
-    })
-    },
+let themes=[];
+let themesMenu=[];
 
-    {
-    label: "Open",
-    accelerator: "CmdOrCtrl+O",
-    click: (() => {
-      var fileName = dialog.showOpenDialog(fileDialogOptions);
-      if(fileName) {      
-        openFile(fileName);
+fs.readdir("/home/jan/Dokumenti/minitask/themes/")
+.then(function(dir) {
+  themes=dir.sort((a,b) => a == "default.css" ? -1 : a < b);
+
+  function withoutExtension(fileName) {
+    var friendlyName = fileName.substr(0, fileName.lastIndexOf('.')) || fileName;
+
+    if(friendlyName == "default")
+      friendlyName = "Spring (default)";
+
+    return friendlyName;
+  }
+
+  var currentTheme = settings.getTheme();
+
+  themesMenu=dir.map(x=>({ label: withoutExtension(x), click:e=>setTheme(x), type: 'radio', checked: x == currentTheme }));
+})
+.then(function() {
+  const template = [
+  {
+    label: "File",
+    submenu: [
+      {
+      label: "New",
+      accelerator: "CmdOrCtrl+N",
+      click: (() => {
+        newFile();
+        setTheme("default");
+      })
+      },
+
+      {
+      label: "Open",
+      accelerator: "CmdOrCtrl+O",
+      click: (() => {
+        var fileName = dialog.showOpenDialog(fileDialogOptions);
+        if(fileName) {      
+          openFile(fileName);
+        }
+      })
+      },
+
+      {
+      label: "Save",
+      accelerator: "CmdOrCtrl+S",
+      click: (() => {
+        save();
+      })
+      },
+
+      {
+      label: "Save as...",
+      accelerator: "Shift+CmdOrCtrl+S",
+      click: (() => {
+        saveAs();
+      })
       }
-    })
-    },
+    ]
+  },
+  {
+    label: "Task",
+    submenu: [
+      {
+      label: "New task",
+      click: (() => {
+        window.dispatchEvent(new CustomEvent('newtask'));
+      })
+      //click () { require('electron').shell.openExternal('http://electron.atom.io') }
+      }
+    ]
+  },
+  {
+    label: "Preferences",
+    submenu: [
+      {
+        label: "Themes",
+        submenu: themesMenu
+      }
+    ]
+  }
+  ];
 
-    {
-    label: "Save",
-    accelerator: "CmdOrCtrl+S",
-    click: (() => {
-      save();
-    })
-    },
-
-    {
-    label: "Save as...",
-    accelerator: "Shift+CmdOrCtrl+S",
-    click: (() => {
-      saveAs();
-    })
-    }
-  ]
-},
-{
-  label: "Task",
-  submenu: [
-    {
-    label: "New task",
-    click: (() => {
-      window.dispatchEvent(new CustomEvent('newtask'));
-    })
-    //click () { require('electron').shell.openExternal('http://electron.atom.io') }
-    }
-  ]
-}
-];
-
-const menu = Menu.buildFromTemplate(template)
-Menu.setApplicationMenu(menu)
+  const menu = Menu.buildFromTemplate(template)
+  Menu.setApplicationMenu(menu)
+});

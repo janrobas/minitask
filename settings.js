@@ -13,3 +13,16 @@ exports.setFileName = fn => {
 exports.getFileName = () => {
 	return get("fileName");
 }
+
+exports.setTheme = th => {
+	set("theme", th);
+}
+
+exports.getTheme = () => {
+	var theme = get("theme");
+	if(theme) {
+		return theme;
+	} else {
+		return "default.css";
+	}
+}

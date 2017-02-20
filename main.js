@@ -32,23 +32,33 @@ app.on("ready", () => {
     // read settings from file
     fs.readFile(configFile, function (err, data) {
       if(!err) {
-        if(data) {
+        if(data) {          
         	// save settings to global variable
-        	global.settings = JSON.parse(String(data));
+          console.log("'" + data.toString() + "'");
+        	global.settings = JSON.parse(data.toString());
         }
 
         // load last used file
         if(settings.getFileName())
         	win.webContents.send("file-open", settings.getFileName());
+
+        // set theme
+        win.webContents.send("set-theme", settings.getTheme());
       }
     });
   });
 
-  win.on("closed", () => {
+  win.on("close", () => {
   	// write settings
-    fs.writeFile(configFile, JSON.stringify(global.settings), function (err) {
-    	win = null;
-    });
-    //app.quit;
+    //console.log(JSON.stringify(global.settings));
+
+    try {
+      fs.writeFileSync(configFile, JSON.stringify(global.settings));
+    } catch(err) {
+      console.error("Error saving settings: " + err);
+    } finally {
+      //console.log("OK");
+      //app.quit;
+    }
   });
 });
