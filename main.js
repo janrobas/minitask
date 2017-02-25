@@ -16,9 +16,9 @@ app.on("window-all-closed", function() {
 });
 
 app.on("ready", () => {
-  win = new BrowserWindow({width: 1000, height: 800});
+  win = new BrowserWindow({width: 1300, height: 800});
 
-  //win.webContents.openDevTools()
+  win.webContents.openDevTools()
 
   win.loadURL(url.format({
     pathname: path.join(__dirname, "index.html"),
@@ -48,7 +48,7 @@ app.on("ready", () => {
     });
   });
 
-  win.on("close", () => {
+  win.on("closed", () => {
   	// write settings
     //console.log(JSON.stringify(global.settings));
 

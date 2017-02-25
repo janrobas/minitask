@@ -46,7 +46,7 @@ let openFile = (fileName) => {
         'tasks': JSON.parse(data),
         'callback': (err => {
           if(err) {
-            alert(err)
+            alert(err);
           } else {
             window.changeHappened = false;
             setFileName(fileName);
@@ -57,7 +57,7 @@ let openFile = (fileName) => {
   }));
 }
 
-let saveFile = (fileName) => {
+let saveFile = (fileName, callback) => {
   window.dispatchEvent(new CustomEvent('get-tasks',
   {
     'detail': {
@@ -68,24 +68,27 @@ let saveFile = (fileName) => {
           }
           window.changeHappened = false;
           setFileName(fileName);
+
+          if(callback)
+            callback();
         });
       })
     }
   }));
 }
 
-let saveAs = () => {
+let saveAs = (callback) => {
   var fileName = dialog.showSaveDialog(fileDialogOptions);
   if(fileName) {
-    saveFile(fileName);
+    saveFile(fileName, callback);
   }
 }
 
-let save = () => {
+let save = (callback) => {
   if(window.fileName) {
-    saveFile(window.fileName);
+    saveFile(window.fileName, callback);
   } else {
-    saveAs();
+    saveAs(callback);
   }
 }
 
@@ -122,11 +125,19 @@ let changeHandler = () => {
   refreshTitleBar();
 }
 
-let askToSaveIfChanged = () => {
-  if(window.changeHappened) {
-    var answer = confirm('Changes have been made. Do you want to save them?');
-    if(answer)
-      save();
+let askToSaveIfChanged = (callback) => {
+  if(window.changeHappened)
+    askToSave(callback)
+}
+
+let askToSave = (callback) => {
+  var answer = confirm('Changes have been made. Do you want to save them?');
+  if(answer) {
+    save(callback);
+    return true;
+  } else {
+    window.changeHappened = false;
+    return false;
   }
 }
 
@@ -144,9 +155,14 @@ let setTheme = th => {
   }
 }
 
-window.addEventListener('beforeunload', function (event) {
-  askToSaveIfChanged();
-  return;
+window.addEventListener('beforeunload', function (e) {
+  if(window.changeHappened) {
+    var saving = askToSave(x=>window.close());
+
+    if(saving) {
+      e.returnValue = "false";
+    }
+  }
 });
 
 var appName="";
@@ -196,8 +212,7 @@ fs.readdir("/home/jan/Dokumenti/minitask/themes/")
       label: "New",
       accelerator: "CmdOrCtrl+N",
       click: (() => {
-        newFile();
-        setTheme("default");
+        newFile("default");
       })
       },
 
@@ -225,6 +240,14 @@ fs.readdir("/home/jan/Dokumenti/minitask/themes/")
       accelerator: "Shift+CmdOrCtrl+S",
       click: (() => {
         saveAs();
+      })
+      },
+
+      {
+      label: "Quit",
+      accelerator: "Ctrl+Q",
+      click: (() => {
+        window.close();
       })
       }
     ]

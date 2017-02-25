@@ -1,6 +1,6 @@
 .column {
   background-color: #FFFFFF;
-  border-left: 1px solid #000000;
+  border-left: 1px solid #0055FF;
 }
 
 .column-backlog {
@@ -8,32 +8,32 @@
 }
 
 div.task {
-  border: 1px solid #000000;
-  background-color: #FFFFFF;
-  border-left: 20px solid #000000;
+  border: 1px solid #0055FF;
+  background-color: #EEEEEE;
+  border-left: 20px solid #0055FF;
   color: #000000;
 }
 
 .column-backlog > div.task {
-  border: 1px solid #000000;
-  background-color: #FFFFFF;
-  border-left: 20px solid #000000;
+  border: 1px solid #0055FF;
+  background-color: #EEEEEE;
+  border-left: 20px solid #0055FF;
   color: #000000;
 }
 
 .column > div.column-title {
-  color: #000000;
+  color: #0055FF;
   font-size: 20px;
 }
 
 .column-backlog > div.column-title {
-  color: #000000;
+  color: #0055FF;
   font-size: 20px;
 }
 
 button {
   background-color: #EEEEEE;
-  border: 1px solid #000000;
-  color: #000000;
+  border: 1px solid #0055FF;
+  color: #0055FF;
   font-size: 14px;
 }

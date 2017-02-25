@@ -1,0 +1,39 @@
+.column {
+  background-color: #EEEEEE;
+  border-left: 1px solid #66AAFF;
+}
+
+.column-backlog {
+  background-color: #DDEFFF;
+}
+
+div.task {
+  border: 1px solid #66AAFF;
+  background-color: #FFFFFF;
+  border-left: 20px solid #66AAFF;
+}
+
+.column-backlog > div.task {
+  border: 1px solid #77BBEE;
+  background-color: #FFFFFF;
+  border-left: 20px solid #77BBEE;
+}
+
+/* pro 0088FF */
+
+.column > div.column-title {
+  color: #66AAFF;
+  font-size: 20px;
+}
+
+.column-backlog > div.column-title {
+  color: #66AAFF;
+  font-size: 20px;
+}
+
+button {
+  background-color: #ffffff;
+  border: 1px solid #66AAFF;
+  color: #66AAFF;
+  font-size: 14px;
+}
