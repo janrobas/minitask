@@ -179,3 +179,14 @@ div.delete {
   color: #EEEEEE;
   font-size: 20px;
 }
+
+div.task.important {
+  border-color: #CC9933;
+}
+
+div.task.important > button {
+  background-color: #ffffff;
+  border: 1px solid #CC9933;
+  color: #CC9933;
+  font-size: 14px;
+}

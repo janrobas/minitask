@@ -20,7 +20,7 @@ class Task extends React.Component {
 
   render() {
     return(
-      <div className={"task" + (this.props.taskObj.displace ? ' displace' : '') + (this.props.taskObj.to_be_moved ? ' moving-task' : '')} onDrop={(e) => this.props.onDrop(e, this.props.taskObj)} onDragOver={(e)=>this.props.onDragOver(e)} draggable="true" onDragEnter={(e) => this.props.onDragEnter(e, this.props.taskObj)} onDragLeave={(e) => this.props.onDragLeave(e, this.props.taskObj)} onDragEnd={(e) => this.props.onDragEnd(e)} onDragStart={(e) => this.props.onDragStart(e, this.props.taskObj)}>
+      <div className={"task" + (this.props.taskObj.displace ? ' displace' : '') + (this.props.taskObj.to_be_moved ? ' moving-task' : '') + (this.props.taskObj.important ? ' important' : '')} onDrop={(e) => this.props.onDrop(e, this.props.taskObj)} onDragOver={(e)=>this.props.onDragOver(e)} draggable="true" onDragEnter={(e) => this.props.onDragEnter(e, this.props.taskObj)} onDragLeave={(e) => this.props.onDragLeave(e, this.props.taskObj)} onDragEnd={(e) => this.props.onDragEnd(e)} onDragStart={(e) => this.props.onDragStart(e, this.props.taskObj)}>
         <div className="title">{this.props.taskObj.title}</div>
         <div className="description">{this.props.taskObj.description}</div>
         <button onClick={() => this.props.editTask()}>Edit</button>
@@ -219,7 +219,7 @@ class Table extends React.Component {
   newTask() {
     this.setState({
       editing: {title:"", state:TaskState.BACKLOG, description:"", order:1}   // default parameters for new task
-    });    
+    });
   }
   createTask(task) {
     return (
@@ -256,7 +256,7 @@ class Table extends React.Component {
       }
     }
   }
-  handleExternalSetTasks(e) {    
+  handleExternalSetTasks(e) {
     var tasks = e.detail.tasks;
 
     // variable that represents tasks must be an array

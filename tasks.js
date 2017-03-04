@@ -20521,7 +20521,7 @@ var Task = function (_React$Component) {
 
       return React.createElement(
         'div',
-        { className: "task" + (this.props.taskObj.displace ? ' displace' : '') + (this.props.taskObj.to_be_moved ? ' moving-task' : ''), onDrop: function onDrop(e) {
+        { className: "task" + (this.props.taskObj.displace ? ' displace' : '') + (this.props.taskObj.to_be_moved ? ' moving-task' : '') + (this.props.taskObj.important ? ' important' : ''), onDrop: function onDrop(e) {
             return _this2.props.onDrop(e, _this2.props.taskObj);
           }, onDragOver: function onDragOver(e) {
             return _this2.props.onDragOver(e);

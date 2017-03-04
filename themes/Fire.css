@@ -1,6 +1,6 @@
 .column {
   background-color: #000000;
-  border-left: 1px solid #EF7500;
+  border-left: 1px solid #DD7500;
 }
 
 .column-backlog {
@@ -8,16 +8,16 @@
 }
 
 div.task {
-  border: 1px solid #EF7500;
+  border: 1px solid #DD7500;
   background-color: #111111;
   border-left: 20px solid #EF7500;
   color: #FFFFFF;
 }
 
 .column-backlog > div.task {
-  border: 1px solid #EF7500;
+  border: 1px solid #DD7500;
   background-color: #111111;
-  border-left: 20px solid #EF7500;
+  border-left: 20px solid #DD7500;
   color: #FFFFFF;
 }
 
@@ -29,13 +29,24 @@ div.task {
 }
 
 .column-backlog > div.column-title {
-  color: #EF7500;
+  color: #DD7500;
   font-size: 20px;
 }
 
 button {
   background-color: #333333;
-  border: 1px solid #EF7500;
-  color: #EF7500;
+  border: 1px solid #DD7500;
+  color: #DD7500;
+  font-size: 14px;
+}
+
+div.task.important {
+  border-color: #FF1100;
+}
+
+div.task.important > button {
+  background-color: #333333;
+  border: 1px solid #FF1100;
+  color: #FF1100;
   font-size: 14px;
 }

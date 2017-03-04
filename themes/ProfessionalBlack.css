@@ -39,3 +39,14 @@ button {
   color: #0088FF;
   font-size: 14px;
 }
+
+div.task.important {
+  border-color: #AA55DD;
+}
+
+div.task.important > button {
+  background-color: #333333;
+  border: 1px solid #AA55DD;
+  color: #AA55DD;
+  font-size: 14px;
+}
