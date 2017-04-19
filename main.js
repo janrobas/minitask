@@ -20,6 +20,17 @@ app.on("ready", () => {
 
   win.webContents.openDevTools()
 
+  // read settings from file
+  fs.readFile(configFile, function (err, data) {
+    if(!err) {
+      if(data) {
+        // save settings to global variable
+        console.log("'" + data.toString() + "'");
+        global.settings = JSON.parse(data.toString());
+      }
+    }
+  });
+
   win.loadURL(url.format({
     pathname: path.join(__dirname, "index.html"),
     protocol: "file:",
@@ -29,23 +40,12 @@ app.on("ready", () => {
   win.webContents.on("did-finish-load", () => {
     win.webContents.send("app-name", titleName);
 
-    // read settings from file
-    fs.readFile(configFile, function (err, data) {
-      if(!err) {
-        if(data) {          
-        	// save settings to global variable
-          console.log("'" + data.toString() + "'");
-        	global.settings = JSON.parse(data.toString());
-        }
+    // load last used file
+    if(settings.getFileName())
+      win.webContents.send("file-open", settings.getFileName());
 
-        // load last used file
-        if(settings.getFileName())
-        	win.webContents.send("file-open", settings.getFileName());
-
-        // set theme
-        win.webContents.send("set-theme", settings.getTheme());
-      }
-    });
+    // set theme
+    win.webContents.send("set-theme", settings.getTheme());
   });
 
   win.on("closed", () => {

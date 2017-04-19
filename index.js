@@ -186,7 +186,7 @@ window.addEventListener("change-happened", changeHandler, false);
 let themes=[];
 let themesMenu=[];
 
-fs.readdir("/home/jan/Dokumenti/minitask/themes/")
+fs.readdir("themes/")
 .then(function(dir) {
   themes=dir.sort((a,b) => a == "default.css" ? -1 : a < b);
 
@@ -202,8 +202,7 @@ fs.readdir("/home/jan/Dokumenti/minitask/themes/")
   var currentTheme = settings.getTheme();
 
   themesMenu=dir.map(x=>({ label: withoutExtension(x), click:e=>setTheme(x), type: 'radio', checked: x == currentTheme }));
-})
-.then(function() {
+
   const template = [
   {
     label: "File",
@@ -221,7 +220,7 @@ fs.readdir("/home/jan/Dokumenti/minitask/themes/")
       accelerator: "CmdOrCtrl+O",
       click: (() => {
         var fileName = dialog.showOpenDialog(fileDialogOptions);
-        if(fileName) {      
+        if(fileName) {
           openFile(fileName);
         }
       })
